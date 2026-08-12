@@ -15,9 +15,10 @@ export default function NightPhaseScreen({ onComplete }) {
   const currentPlayer = players[currentPlayerIndex];
 
   useEffect(() => {
-    fetch('/assets/data/words.json')
+    fetch(`${import.meta.env.BASE_URL}assets/data/words.json`)
       .then(res => res.json())
-      .then(data => setWordsData(data));
+      .then(data => setWordsData(data))
+      .catch(err => console.warn("Kelime dosyası bulunamadı", err));
   }, []);
 
   // Görünmez Zamanlayıcılar (Otomatik Uyutma)

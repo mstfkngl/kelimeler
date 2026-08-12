@@ -1,21 +1,26 @@
 export const playAudio = (fileName) => {
   return new Promise((resolve) => {
-    // public klasöründeki dosyayı doğrudan çağırıyoruz
-    const audio = new Audio(`/assets/audio/${fileName}`);
+    // Vite'in otomatik base yolunu alıyoruz (GitHub Pages'te /kelimeler/ olur)
+    const basePath = import.meta.env.BASE_URL;
+    const audioPath = `${basePath}assets/audio/${fileName}`;
     
-    // Ses normal şekilde bittiğinde çöz (resolve)
-    audio.onended = resolve;
+    const audio = new Audio(audioPath);
     
-    // Eğer dosya bulunamazsa (sen GitHub'a yükleyene kadar) oyun kilitlenmesin
-    audio.onerror = () => {
-      console.warn(`Uyarı: ${fileName} bulunamadı, sessiz geçiliyor.`);
-      setTimeout(resolve, 2000); // 2 saniye bekle ve devam et
+    // 1. Senaryo: Ses başarıyla çalar ve biterse
+    audio.onended = () => {
+      resolve();
     };
 
-    // Sesi oynatmayı dene, tarayıcı engellerse yakala
-    audio.play().catch((e) => {
-      console.warn("Tarayıcı otomatik ses oynatmayı engelledi:", e);
-      setTimeout(resolve, 2000);
+    // 2. Senaryo: Dosya bulunamazsa (404) oyunu KİLİTLEMEMEK için devam et
+    audio.onerror = () => {
+      console.warn(`Ses dosyası yüklenemedi, atlanıyor: ${audioPath}`);
+      resolve(); 
+    };
+
+    // Ses çalma işlemi tarayıcı (Autoplay engeli vb.) tarafından reddedilirse devam et
+    audio.play().catch((error) => {
+      console.warn(`Ses çalınamadı (Tarayıcı engeli):`, error);
+      resolve();
     });
   });
 };
